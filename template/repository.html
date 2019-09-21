@@ -1,0 +1,18 @@
+<html>
+<head>
+  <title>fudge</title>
+</head>
+<body>
+  <h1>{{ .Name }}</h1>
+
+  <ul>
+    {{ range .Files }}
+      {{ if .IsFile }}
+      <li><a href="blob/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
+      {{ else }}
+      <li><a href="tree/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
+      {{ end }}
+    {{ end }}
+  </ul>
+</body>
+</html>

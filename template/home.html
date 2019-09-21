@@ -1,0 +1,16 @@
+<html>
+<head>
+  <title>fudge</title>
+</head>
+<body>
+  <h1>Home</h1>
+
+  {{ if .Names }}
+  <ul>
+    {{ range .Names }}
+    <li><a href="{{ . }}">{{ . }}</a></li>
+    {{ end }}
+  </ul>
+  {{ end }}
+</body>
+</html>

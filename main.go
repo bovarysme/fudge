@@ -9,18 +9,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
-
-type fileInfo struct {
-	Name   string
-	IsFile bool
-	Size   string
-}
 
 func isRepository(filename string) (bool, error) {
 	path := filepath.Join(root, filename)
@@ -66,16 +61,75 @@ func getRepositoryNames() ([]string, error) {
 	return names, nil
 }
 
+type treeObject struct {
+	Name   string
+	IsFile bool
+	Size   string // The object humanized size
+}
+
+func getTreeObjects(tree *object.Tree) ([]*treeObject, error) {
+	var objects []*treeObject
+
+	walker := object.NewTreeWalker(tree, false, nil)
+
+	for {
+		name, entry, err := walker.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		size, err := tree.Size(name)
+		if err != nil {
+			return nil, err
+		}
+
+		o := &treeObject{
+			Name:   name,
+			IsFile: entry.Mode.IsFile(),
+			Size:   humanize.Bytes(uint64(size)),
+		}
+
+		objects = append(objects, o)
+	}
+
+	sort.Slice(objects, func(i, j int) bool {
+		// Order the objects by non-files then names
+		if !objects[i].IsFile && objects[j].IsFile {
+			return true
+		}
+
+		if objects[i].IsFile && !objects[j].IsFile {
+			return false
+		}
+
+		return objects[i].Name < objects[j].Name
+	})
+
+	return objects, nil
+}
+
+func errorHandler(w http.ResponseWriter, r *http.Request, status int, err error) {
+	switch status {
+	case http.StatusNotFound:
+		http.NotFound(w, r)
+	case http.StatusInternalServerError:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	names, err := getRepositoryNames()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	t, err := template.ParseFiles("template/home.html")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -92,80 +146,58 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	ok, err := isRepository(vars["repository"])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	if !ok {
-		http.NotFound(w, r)
+		errorHandler(w, r, http.StatusNotFound, nil)
 		return
 	}
 
 	path := filepath.Join(root, vars["repository"])
 	repository, err := git.PlainOpen(path)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	head, err := repository.Head()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	commit, err := repository.CommitObject(head.Hash())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	tree, err := commit.Tree()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	walker := object.NewTreeWalker(tree, false, nil)
-
-	var files []*fileInfo
-	for {
-		name, entry, err := walker.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		size, err := tree.Size(name)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		info := &fileInfo{
-			Name:   name,
-			IsFile: entry.Mode.IsFile(),
-			Size:   humanize.Bytes(uint64(size)),
-		}
-
-		files = append(files, info)
+	objects, err := getTreeObjects(tree)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
 	}
 
 	t, err := template.ParseFiles("template/repository.html")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	params := struct {
-		Name  string
-		Files []*fileInfo
+		Name    string
+		Objects []*treeObject
 	}{
 		vars["repository"],
-		files,
+		objects,
 	}
 	t.Execute(w, params)
 }

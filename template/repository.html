@@ -6,7 +6,7 @@
   <h1>{{ .Name }}</h1>
 
   <ul>
-    {{ range .Files }}
+    {{ range .Objects }}
       {{ if .IsFile }}
       <li><a href="blob/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
       {{ else }}

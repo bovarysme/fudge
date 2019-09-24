@@ -1,9 +1,5 @@
-<html>
-<head>
-  <title>fudge</title>
-</head>
-<body>
-  <h1>{{ .Name }}</h1>
+{{ define "content" }}
+  <h2>{{ .Name }}</h2>
 
   <ul>
     {{ range .Objects }}
@@ -14,5 +10,4 @@
       {{ end }}
     {{ end }}
   </ul>
-</body>
-</html>
+{{ end }}

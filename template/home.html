@@ -1,16 +1,9 @@
-<html>
-<head>
-  <title>fudge</title>
-</head>
-<body>
-  <h1>Home</h1>
-
-  {{ if .Names }}
-  <ul>
-    {{ range .Names }}
-    <li><a href="{{ . }}">{{ . }}</a></li>
-    {{ end }}
-  </ul>
+{{ define "content" }}
+{{ if .Names }}
+<ul>
+  {{ range .Names }}
+  <li><a href="{{ . }}">{{ . }}</a></li>
   {{ end }}
-</body>
-</html>
+</ul>
+{{ end }}
+{{ end }}

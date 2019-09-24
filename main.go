@@ -127,7 +127,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("template/home.html")
+	t, err := template.ParseFiles("template/layout.html", "template/home.html")
 	if err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
@@ -138,7 +138,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		names,
 	}
-	t.Execute(w, params)
+
+	err = t.ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
 }
 
 func repositoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -186,7 +191,7 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("template/repository.html")
+	t, err := template.ParseFiles("template/layout.html", "template/repository.html")
 	if err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
@@ -199,7 +204,12 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 		vars["repository"],
 		objects,
 	}
-	t.Execute(w, params)
+
+	err = t.ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
 }
 
 func main() {

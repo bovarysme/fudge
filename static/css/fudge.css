@@ -1,0 +1,8 @@
+.tree {
+  text-decoration: none;
+  color: purple;
+}
+
+.tree:hover {
+  text-decoration: underline;
+}

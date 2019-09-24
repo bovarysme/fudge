@@ -6,7 +6,7 @@
       {{ if .IsFile }}
       <li><a href="blob/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
       {{ else }}
-      <li><a href="tree/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
+      <li><a href="tree/master/{{ .Name }}" class="tree">{{ .Name }}</a> {{ .Size }}</li>
       {{ end }}
     {{ end }}
   </ul>

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -10,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
@@ -213,8 +213,12 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	staticHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
+
 	router := mux.NewRouter()
 	router.StrictSlash(true)
+
+	router.PathPrefix("/static/").Handler(staticHandler)
 	router.HandleFunc("/", homeHandler)
 	router.HandleFunc("/{repository}", repositoryHandler)
 	router.HandleFunc("/{repository}/commits/{branch}", nil)
@@ -222,6 +226,16 @@ func main() {
 	router.HandleFunc("/{repository}/blob/{commit}/{path:.*}", nil)
 	router.HandleFunc("/{repository}/raw/{commit}/{path:.*}", nil)
 
-	fmt.Println("Starting server on localhost:8080")
-	log.Fatal(http.ListenAndServe("localhost:8080", router))
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+
+	server := &http.Server{
+		Addr:         "localhost:8080",
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		ErrorLog:     logger,
+	}
+
+	logger.Println("Starting server on", server.Addr)
+	log.Fatal(server.ListenAndServe())
 }

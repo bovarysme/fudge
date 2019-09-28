@@ -1,13 +1,14 @@
 {{ define "content" }}
-  <h2>{{ .Name }}</h2>
+  <h2>{{ .Name }}{{ if .Path }}/{{ .Path }}{{ end }}</h2>
 
   <ul>
     {{ range .Objects }}
       {{ if .IsFile }}
-      <!-- Pass repo name and path. Concat path with name. -->
-      <li><a href="blob/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
+      <li><a href="/{{ $.Name }}/blob/master/{{ $.Path }}/{{ .Name }}">
+          {{ .Name }}</a> {{ .Size }}</li>
       {{ else }}
-      <li><a href="tree/master/{{ .Name }}" class="tree">{{ .Name }}</a> {{ .Size }}</li>
+      <li><a href="/{{ $.Name }}/tree/master/{{ $.Path }}/{{ .Name }}" class="tree">
+          {{ .Name }}</a> {{ .Size }}</li>
       {{ end }}
     {{ end }}
   </ul>

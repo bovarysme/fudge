@@ -4,6 +4,7 @@
   <ul>
     {{ range .Objects }}
       {{ if .IsFile }}
+      <!-- Pass repo name and path. Concat path with name. -->
       <li><a href="blob/master/{{ .Name }}">{{ .Name }}</a> {{ .Size }}</li>
       {{ else }}
       <li><a href="tree/master/{{ .Name }}" class="tree">{{ .Name }}</a> {{ .Size }}</li>

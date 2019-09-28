@@ -17,27 +17,11 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
-func isRepository(filename string) (bool, error) {
+func openRepository(filename string) (*git.Repository, error) {
 	path := filepath.Join(root, filename)
+	repository, err := git.PlainOpen(path)
 
-	file, err := os.Stat(path)
-	if err != nil {
-		return false, nil
-	}
-
-	if !file.IsDir() {
-		return false, nil
-	}
-
-	_, err = git.PlainOpen(path)
-	if err == git.ErrRepositoryNotExists {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
+	return repository, err
 }
 
 func getRepositoryNames() ([]string, error) {
@@ -49,16 +33,44 @@ func getRepositoryNames() ([]string, error) {
 	}
 
 	for _, file := range files {
-		ok, err := isRepository(file.Name())
+		_, err := openRepository(file.Name())
+		if err == git.ErrRepositoryNotExists {
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
-		if ok {
-			names = append(names, file.Name())
-		}
+
+		names = append(names, file.Name())
 	}
 
 	return names, nil
+}
+
+func getRepositoryTree(repository *git.Repository, path string) (*object.Tree, error) {
+	head, err := repository.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := repository.CommitObject(head.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	if path != "" {
+		tree, err = tree.Tree(path)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return tree, nil
 }
 
 type treeObject struct {
@@ -146,42 +158,22 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func repositoryHandler(w http.ResponseWriter, r *http.Request) {
+func treeHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	ok, err := isRepository(vars["repository"])
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	if !ok {
+	repository, err := openRepository(vars["repository"])
+	if err == git.ErrRepositoryNotExists {
 		errorHandler(w, r, http.StatusNotFound, nil)
 		return
 	}
-
-	path := filepath.Join(root, vars["repository"])
-	repository, err := git.PlainOpen(path)
 	if err != nil {
 		errorHandler(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	head, err := repository.Head()
+	tree, err := getRepositoryTree(repository, vars["path"])
 	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	commit, err := repository.CommitObject(head.Hash())
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	tree, err := commit.Tree()
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
+		errorHandler(w, r, http.StatusNotFound, nil)
 		return
 	}
 
@@ -199,9 +191,59 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := struct {
 		Name    string
+		Path    string
 		Objects []*treeObject
 	}{
 		vars["repository"],
+		vars["path"],
+		objects,
+	}
+
+	err = t.ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func repositoryHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	repository, err := openRepository(vars["repository"])
+	if err == git.ErrRepositoryNotExists {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	tree, err := getRepositoryTree(repository, "")
+	if err != nil {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+
+	objects, err := getTreeObjects(tree)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	t, err := template.ParseFiles("template/layout.html", "template/repository.html")
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	params := struct {
+		Name    string
+		Path    string
+		Objects []*treeObject
+	}{
+		vars["repository"],
+		"",
 		objects,
 	}
 
@@ -218,11 +260,12 @@ func main() {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
+	// TODO: favicon.ico, robots.txt routes
 	router.PathPrefix("/static/").Handler(staticHandler)
 	router.HandleFunc("/", homeHandler)
-	router.HandleFunc("/{repository}", repositoryHandler)
+	router.HandleFunc("/{repository}/", repositoryHandler)
 	router.HandleFunc("/{repository}/commits/{branch}", nil)
-	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", nil)
+	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", treeHandler)
 	router.HandleFunc("/{repository}/blob/{commit}/{path:.*}", nil)
 	router.HandleFunc("/{repository}/raw/{commit}/{path:.*}", nil)
 

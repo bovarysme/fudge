@@ -158,54 +158,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func treeHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	repository, err := openRepository(vars["repository"])
-	if err == git.ErrRepositoryNotExists {
-		errorHandler(w, r, http.StatusNotFound, nil)
-		return
-	}
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	tree, err := getRepositoryTree(repository, vars["path"])
-	if err != nil {
-		errorHandler(w, r, http.StatusNotFound, nil)
-		return
-	}
-
-	objects, err := getTreeObjects(tree)
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	t, err := template.ParseFiles("template/layout.html", "template/repository.html")
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	params := struct {
-		Name    string
-		Path    string
-		Objects []*treeObject
-	}{
-		vars["repository"],
-		vars["path"],
-		objects,
-	}
-
-	err = t.ExecuteTemplate(w, "layout", params)
-	if err != nil {
-		errorHandler(w, r, http.StatusInternalServerError, err)
-		return
-	}
-}
-
 func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -219,7 +171,12 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := getRepositoryTree(repository, "")
+	path, ok := vars["path"]
+	if !ok {
+		path = ""
+	}
+
+	tree, err := getRepositoryTree(repository, path)
 	if err != nil {
 		errorHandler(w, r, http.StatusNotFound, nil)
 		return
@@ -243,7 +200,7 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 		Objects []*treeObject
 	}{
 		vars["repository"],
-		"",
+		path,
 		objects,
 	}
 
@@ -265,7 +222,7 @@ func main() {
 	router.HandleFunc("/", homeHandler)
 	router.HandleFunc("/{repository}/", repositoryHandler)
 	router.HandleFunc("/{repository}/commits/{branch}", nil)
-	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", treeHandler)
+	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", repositoryHandler)
 	router.HandleFunc("/{repository}/blob/{commit}/{path:.*}", nil)
 	router.HandleFunc("/{repository}/raw/{commit}/{path:.*}", nil)
 

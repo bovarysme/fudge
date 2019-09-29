@@ -1,0 +1,9 @@
+{{ define "content" }}
+  <h2>{{ .Name }}</h2>
+
+  <ul>
+    {{ range .Commits }}
+    <li>{{ .Author.Name }} {{ .Message }} {{ .Author.When.Format "Jan 2, 2006" }}</li>
+    {{ end }}
+  </ul>
+{{ end }}

@@ -158,6 +158,67 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getCommits(r *git.Repository) ([]*object.Commit, error) {
+	iter, err := r.Log(&git.LogOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var commits []*object.Commit
+
+	// TODO: paginate using NewFilterCommitIter
+	err = iter.ForEach(func(c *object.Commit) error {
+		commits = append(commits, c)
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return commits, nil
+}
+
+func commitHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	repository, err := openRepository(vars["repository"])
+	if err == git.ErrRepositoryNotExists {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	commits, err := getCommits(repository)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	t, err := template.ParseFiles("template/layout.html", "template/commits.html")
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	params := struct {
+		Name    string
+		Commits []*object.Commit
+	}{
+		vars["repository"],
+		commits,
+	}
+
+	err = t.ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+}
+
 func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -221,7 +282,7 @@ func main() {
 	router.PathPrefix("/static/").Handler(staticHandler)
 	router.HandleFunc("/", homeHandler)
 	router.HandleFunc("/{repository}/", repositoryHandler)
-	router.HandleFunc("/{repository}/commits/{branch}", nil)
+	router.HandleFunc("/{repository}/commits", commitHandler)
 	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", repositoryHandler)
 	router.HandleFunc("/{repository}/blob/{commit}/{path:.*}", nil)
 	router.HandleFunc("/{repository}/raw/{commit}/{path:.*}", nil)

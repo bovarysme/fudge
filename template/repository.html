@@ -6,10 +6,10 @@
   <ul>
     {{ range .Objects }}
       {{ if .IsFile }}
-      <li><a href="/{{ $.Name }}/blob/master/{{ $.Path }}/{{ .Name }}">
+      <li><a href="/{{ $.Name }}/blob/{{ $.Path }}/{{ .Name }}">
           {{ .Name }}</a> {{ .Size }}</li>
       {{ else }}
-      <li><a href="/{{ $.Name }}/tree/master/{{ $.Path }}/{{ .Name }}" class="tree">
+      <li><a href="/{{ $.Name }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">
           {{ .Name }}</a> {{ .Size }}</li>
       {{ end }}
     {{ end }}

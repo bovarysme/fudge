@@ -272,6 +272,77 @@ func repositoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func blobHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	repository, err := openRepository(vars["repository"])
+	if err == git.ErrRepositoryNotExists {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	tree, err := getRepositoryTree(repository, "")
+	if err != nil {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+
+	file, err := tree.File(vars["path"])
+	if err != nil {
+		errorHandler(w, r, http.StatusNotFound, nil)
+		return
+	}
+
+	binary, err := file.IsBinary()
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	var contents string
+	if !binary {
+		reader, err := file.Blob.Reader()
+		if err != nil {
+			errorHandler(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		contents, err = highlight(file.Name, reader)
+		if err != nil {
+			errorHandler(w, r, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	t, err := template.ParseFiles("template/layout.html", "template/blob.html")
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	params := struct {
+		Name     string
+		Path     string
+		Binary   bool
+		Contents template.HTML
+	}{
+		vars["repository"],
+		vars["path"],
+		binary,
+		template.HTML(contents),
+	}
+
+	err = t.ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		errorHandler(w, r, http.StatusInternalServerError, err)
+		return
+	}
+}
+
 func main() {
 	staticHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
 
@@ -283,9 +354,9 @@ func main() {
 	router.HandleFunc("/", homeHandler)
 	router.HandleFunc("/{repository}/", repositoryHandler)
 	router.HandleFunc("/{repository}/commits", commitHandler)
-	router.HandleFunc("/{repository}/tree/{commit}/{path:.*}", repositoryHandler)
-	router.HandleFunc("/{repository}/blob/{commit}/{path:.*}", nil)
-	router.HandleFunc("/{repository}/raw/{commit}/{path:.*}", nil)
+	router.HandleFunc("/{repository}/tree/{path:.*}", repositoryHandler)
+	router.HandleFunc("/{repository}/blob/{path:.*}", blobHandler)
+	router.HandleFunc("/{repository}/raw/{path:.*}", nil)
 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 

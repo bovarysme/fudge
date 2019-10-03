@@ -10,7 +10,7 @@
           {{ .Name }}</a> {{ .Size }}</li>
       {{ else }}
       <li><a href="/{{ $.Name }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">
-          {{ .Name }}</a> {{ .Size }}</li>
+          {{ .Name }}</a></li>
       {{ end }}
     {{ end }}
   </ul>

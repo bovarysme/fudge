@@ -1,8 +1,13 @@
 {{ define "content" }}
+<h2>Repositories</h2>
+
 {{ if .Names }}
-<ul>
+<ul id="repositories">
   {{ range .Names }}
-  <li><a href="{{ . }}">{{ . }}</a></li>
+  <li>
+    <p><a href="{{ . }}">{{ . }}</a></p>
+    <p>This is a description.</p>
+  </li>
   {{ end }}
 </ul>
 {{ end }}

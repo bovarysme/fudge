@@ -1,8 +1,62 @@
-.tree {
-  text-decoration: none;
-  color: purple;
+html {
+  font-family: sans-serif;
 }
 
-.tree:hover {
+body {
+  margin: 0;
+}
+
+header {
+  padding: 0 2em;
+  background-color: #8d5272;
+  color: #fff;
+}
+
+header h1 {
+  display: inline-block;
+}
+
+header a, header a:visited {
+  color: inherit;
+}
+
+header a:hover {
+  text-decoration: none;
+}
+
+main {
+  max-width: 64em;
+  margin: auto;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
   text-decoration: underline;
+}
+
+a, a:visited {
+  color: blue;
+}
+
+#repositories {
+  padding-left: 0;
+}
+
+#repositories li {
+  margin-top: 1em;
+  border-bottom: 1px #ccc solid;
+  padding: 0 0.5em;
+  padding-bottom: 1em;
+  list-style: none;
+}
+
+#repositories li p {
+  margin: 0;
+}
+
+#repositories li p:first-child {
+  margin-bottom: 1em;
 }

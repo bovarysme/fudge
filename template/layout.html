@@ -1,13 +1,21 @@
 {{ define "layout" }}
 <html>
 <head>
-  <title>fudge</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Fudge</title>
 
   <link rel="stylesheet" type="text/css" href="/static/css/fudge.css">
 </head>
 <body>
-  <h1><a href="/">Fudge</a></h1>
-  {{ template "content" . }}
+  <header>
+    <h1><a href="/">Fudge</a></h1>
+  </header>
+
+  <main>
+    {{ template "content" . }}
+  </main>
 </body>
 </html>
 {{ end }}

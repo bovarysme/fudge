@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -31,7 +32,7 @@ func NewHandler() (*handler, error) {
 	h.router.HandleFunc("/{repository}/commits", h.showCommits)
 	h.router.HandleFunc("/{repository}/tree/{path:.*}", h.showTree)
 	h.router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
-	// h.router.HandleFunc("/{repository}/raw/{path:.*}", nil)
+	h.router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
 
 	pages := []string{"home", "commits", "tree", "blob"}
 	for _, page := range pages {
@@ -217,6 +218,56 @@ func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.tmpl["blob"].ExecuteTemplate(w, "layout", params)
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (h *handler) sendBlob(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	repository, err := openRepository(vars["repository"])
+	if err == git.ErrRepositoryNotExists {
+		h.showError(w, r, http.StatusNotFound, nil)
+		return
+	}
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	tree, err := getRepositoryTree(repository, "")
+	if err != nil {
+		h.showError(w, r, http.StatusNotFound, nil)
+		return
+	}
+
+	file, err := tree.File(vars["path"])
+	if err != nil {
+		h.showError(w, r, http.StatusNotFound, nil)
+		return
+	}
+
+	reader, err := file.Blob.Reader()
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	binary, err := file.IsBinary()
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	if binary {
+		w.Header().Set("Content-Type", "application/octet-stream")
+	} else {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	}
+
+	_, err = io.Copy(w, reader)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return

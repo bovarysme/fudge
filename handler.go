@@ -6,18 +6,22 @@ import (
 	"io"
 	"net/http"
 
+	"fudge/config"
+
 	"github.com/gorilla/mux"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 type handler struct {
+	config *config.Config
 	router *mux.Router
 	tmpl   map[string]*template.Template
 }
 
-func NewHandler() (*handler, error) {
+func NewHandler(cfg *config.Config) (*handler, error) {
 	h := &handler{
+		config: cfg,
 		router: mux.NewRouter(),
 		tmpl:   make(map[string]*template.Template),
 	}
@@ -60,7 +64,7 @@ func (h *handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 			Debug bool
 			Error string
 		}{
-			true, // TODO: get value from config
+			h.config.Debug,
 			err.Error(),
 		}
 
@@ -69,7 +73,7 @@ func (h *handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 }
 
 func (h *handler) showHome(w http.ResponseWriter, r *http.Request) {
-	names, err := getRepositoryNames()
+	names, err := getRepositoryNames(h.config.Root)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
@@ -91,7 +95,7 @@ func (h *handler) showHome(w http.ResponseWriter, r *http.Request) {
 func (h *handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(vars["repository"])
+	repository, err := openRepository(h.config.Root, vars["repository"])
 	if err == git.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -125,7 +129,7 @@ func (h *handler) showCommits(w http.ResponseWriter, r *http.Request) {
 func (h *handler) showTree(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(vars["repository"])
+	repository, err := openRepository(h.config.Root, vars["repository"])
 	if err == git.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -172,7 +176,7 @@ func (h *handler) showTree(w http.ResponseWriter, r *http.Request) {
 func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(vars["repository"])
+	repository, err := openRepository(h.config.Root, vars["repository"])
 	if err == git.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -220,7 +224,7 @@ func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 func (h *handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(vars["repository"])
+	repository, err := openRepository(h.config.Root, vars["repository"])
 	if err == git.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return

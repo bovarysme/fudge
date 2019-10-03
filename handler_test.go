@@ -5,10 +5,17 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"fudge/config"
 )
 
 func TestRepositoryNotFound(t *testing.T) {
-	h, err := NewHandler()
+	cfg, err := config.NewConfig("config.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	h, err := NewHandler(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

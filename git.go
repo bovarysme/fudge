@@ -23,14 +23,14 @@ type treeBlob struct {
 	Reader   io.ReadCloser
 }
 
-func openRepository(filename string) (*git.Repository, error) {
+func openRepository(root, filename string) (*git.Repository, error) {
 	path := filepath.Join(root, filename)
 	repository, err := git.PlainOpen(path)
 
 	return repository, err
 }
 
-func getRepositoryNames() ([]string, error) {
+func getRepositoryNames(root string) ([]string, error) {
 	files, err := ioutil.ReadDir(root)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func getRepositoryNames() ([]string, error) {
 	var names []string
 
 	for _, file := range files {
-		_, err := openRepository(file.Name())
+		_, err := openRepository(root, file.Name())
 		if err == git.ErrRepositoryNotExists {
 			continue
 		}

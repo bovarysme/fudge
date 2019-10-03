@@ -1,4 +1,8 @@
 # fudge
+## Usage
+
+- Move `config.example.yml` to `config.yml` and edit it.
+- Run `go run fudge`.
 
 ## License
 

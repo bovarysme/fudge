@@ -8,6 +8,7 @@ import (
 
 	"fudge/config"
 	"fudge/git"
+	"fudge/syntax"
 
 	"github.com/gorilla/mux"
 	gogit "gopkg.in/src-d/go-git.v4"
@@ -198,7 +199,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	var contents string
 
 	if !blob.IsBinary {
-		contents, err = highlight(blob.Name, blob.Reader)
+		contents, err = syntax.Highlight(blob.Name, blob.Reader)
 		if err != nil {
 			h.showError(w, r, http.StatusInternalServerError, err)
 			return

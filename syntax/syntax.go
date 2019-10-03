@@ -1,4 +1,4 @@
-package main
+package syntax
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ func getStyle() (*chroma.Style, error) {
 	return style, nil
 }
 
-func highlight(filename string, r io.ReadCloser) (string, error) {
+func Highlight(filename string, r io.ReadCloser) (string, error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return "", err

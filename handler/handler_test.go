@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -37,6 +37,6 @@ func TestRepositoryNotFound(t *testing.T) {
 
 	body := recorder.Body.String()
 	if !strings.Contains(body, "Page not found") {
-		t.Errorf("body does not contains 'Page not found'")
+		t.Error("body does not contains 'Page not found'")
 	}
 }

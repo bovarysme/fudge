@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fudge/config"
+	"fudge/handler"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler, err := NewHandler(cfg)
+	h, err := handler.NewHandler(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +25,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:         "localhost:8080",
-		Handler:      handler.Router,
+		Handler:      h.Router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		ErrorLog:     logger,

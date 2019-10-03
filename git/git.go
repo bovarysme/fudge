@@ -1,4 +1,4 @@
-package main
+package git
 
 import (
 	"io"
@@ -11,26 +11,26 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
-type treeObject struct {
+type TreeObject struct {
 	Name   string
 	IsFile bool
 	Size   string // The object humanized size
 }
 
-type treeBlob struct {
+type TreeBlob struct {
 	Name     string
 	IsBinary bool
 	Reader   io.ReadCloser
 }
 
-func openRepository(root, filename string) (*git.Repository, error) {
+func OpenRepository(root, filename string) (*git.Repository, error) {
 	path := filepath.Join(root, filename)
 	repository, err := git.PlainOpen(path)
 
 	return repository, err
 }
 
-func getRepositoryNames(root string) ([]string, error) {
+func GetRepositoryNames(root string) ([]string, error) {
 	files, err := ioutil.ReadDir(root)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func getRepositoryNames(root string) ([]string, error) {
 	var names []string
 
 	for _, file := range files {
-		_, err := openRepository(root, file.Name())
+		_, err := OpenRepository(root, file.Name())
 		if err == git.ErrRepositoryNotExists {
 			continue
 		}
@@ -53,7 +53,7 @@ func getRepositoryNames(root string) ([]string, error) {
 	return names, nil
 }
 
-func getRepositoryCommits(r *git.Repository) ([]*object.Commit, error) {
+func GetRepositoryCommits(r *git.Repository) ([]*object.Commit, error) {
 	iter, err := r.Log(&git.LogOptions{})
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func getRepositoryCommits(r *git.Repository) ([]*object.Commit, error) {
 	return commits, nil
 }
 
-func getRepositoryTree(repository *git.Repository, path string) (*object.Tree, error) {
+func GetRepositoryTree(repository *git.Repository, path string) (*object.Tree, error) {
 	head, err := repository.Head()
 	if err != nil {
 		return nil, err
@@ -100,13 +100,13 @@ func getRepositoryTree(repository *git.Repository, path string) (*object.Tree, e
 	return tree, nil
 }
 
-func getRepositoryBlob(repository *git.Repository, path string) (*treeBlob, error) {
+func GetRepositoryBlob(repository *git.Repository, path string) (*TreeBlob, error) {
 	dir := filepath.Dir(path)
 	if dir == "." {
 		dir = ""
 	}
 
-	tree, err := getRepositoryTree(repository, dir)
+	tree, err := GetRepositoryTree(repository, dir)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func getRepositoryBlob(repository *git.Repository, path string) (*treeBlob, erro
 		return nil, err
 	}
 
-	blob := &treeBlob{
+	blob := &TreeBlob{
 		Name:     file.Name,
 		IsBinary: isBinary,
 		Reader:   reader,
@@ -136,8 +136,8 @@ func getRepositoryBlob(repository *git.Repository, path string) (*treeBlob, erro
 	return blob, nil
 }
 
-func getTreeObjects(tree *object.Tree) ([]*treeObject, error) {
-	var objects []*treeObject
+func GetTreeObjects(tree *object.Tree) ([]*TreeObject, error) {
+	var objects []*TreeObject
 
 	walker := object.NewTreeWalker(tree, false, nil)
 
@@ -155,7 +155,7 @@ func getTreeObjects(tree *object.Tree) ([]*treeObject, error) {
 			return nil, err
 		}
 
-		o := &treeObject{
+		o := &TreeObject{
 			Name:   name,
 			IsFile: entry.Mode.IsFile(),
 			Size:   humanize.Bytes(uint64(size)),

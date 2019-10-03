@@ -7,9 +7,10 @@ import (
 	"net/http"
 
 	"fudge/config"
+	"fudge/git"
 
 	"github.com/gorilla/mux"
-	"gopkg.in/src-d/go-git.v4"
+	gogit "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
@@ -75,7 +76,7 @@ func (h *Handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 }
 
 func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
-	names, err := getRepositoryNames(h.config.Root)
+	names, err := git.GetRepositoryNames(h.config.Root)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
@@ -97,8 +98,8 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(h.config.Root, vars["repository"])
-	if err == git.ErrRepositoryNotExists {
+	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
@@ -107,7 +108,7 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commits, err := getRepositoryCommits(repository)
+	commits, err := git.GetRepositoryCommits(repository)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
@@ -131,8 +132,8 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(h.config.Root, vars["repository"])
-	if err == git.ErrRepositoryNotExists {
+	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
@@ -146,13 +147,13 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 		path = ""
 	}
 
-	tree, err := getRepositoryTree(repository, path)
+	tree, err := git.GetRepositoryTree(repository, path)
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
 
-	objects, err := getTreeObjects(tree)
+	objects, err := git.GetTreeObjects(tree)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
@@ -161,7 +162,7 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	params := struct {
 		Name    string
 		Path    string
-		Objects []*treeObject
+		Objects []*git.TreeObject
 	}{
 		vars["repository"],
 		path,
@@ -178,8 +179,8 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(h.config.Root, vars["repository"])
-	if err == git.ErrRepositoryNotExists {
+	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
@@ -188,7 +189,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blob, err := getRepositoryBlob(repository, vars["path"])
+	blob, err := git.GetRepositoryBlob(repository, vars["path"])
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -226,8 +227,8 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := openRepository(h.config.Root, vars["repository"])
-	if err == git.ErrRepositoryNotExists {
+	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
@@ -236,7 +237,7 @@ func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blob, err := getRepositoryBlob(repository, vars["path"])
+	blob, err := git.GetRepositoryBlob(repository, vars["path"])
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return

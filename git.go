@@ -17,6 +17,12 @@ type treeObject struct {
 	Size   string // The object humanized size
 }
 
+type treeBlob struct {
+	Name     string
+	IsBinary bool
+	Reader   io.ReadCloser
+}
+
 func openRepository(filename string) (*git.Repository, error) {
 	path := filepath.Join(root, filename)
 	repository, err := git.PlainOpen(path)
@@ -92,6 +98,42 @@ func getRepositoryTree(repository *git.Repository, path string) (*object.Tree, e
 	}
 
 	return tree, nil
+}
+
+func getRepositoryBlob(repository *git.Repository, path string) (*treeBlob, error) {
+	dir := filepath.Dir(path)
+	if dir == "." {
+		dir = ""
+	}
+
+	tree, err := getRepositoryTree(repository, dir)
+	if err != nil {
+		return nil, err
+	}
+
+	filename := filepath.Base(path)
+	file, err := tree.File(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	isBinary, err := file.IsBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	reader, err := file.Blob.Reader()
+	if err != nil {
+		return nil, err
+	}
+
+	blob := &treeBlob{
+		Name:     file.Name,
+		IsBinary: isBinary,
+		Reader:   reader,
+	}
+
+	return blob, nil
 }
 
 func getTreeObjects(tree *object.Tree) ([]*treeObject, error) {

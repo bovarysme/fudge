@@ -172,33 +172,16 @@ func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := getRepositoryTree(repository, "")
+	blob, err := getRepositoryBlob(repository, vars["path"])
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
-
-	file, err := tree.File(vars["path"])
-	if err != nil {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
-
-	binary, err := file.IsBinary()
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	var contents string
-	if !binary {
-		reader, err := file.Blob.Reader()
-		if err != nil {
-			h.showError(w, r, http.StatusInternalServerError, err)
-			return
-		}
 
-		contents, err = highlight(file.Name, reader)
+	if !blob.IsBinary {
+		contents, err = highlight(blob.Name, blob.Reader)
 		if err != nil {
 			h.showError(w, r, http.StatusInternalServerError, err)
 			return
@@ -213,7 +196,7 @@ func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	}{
 		vars["repository"],
 		vars["path"],
-		binary,
+		blob.IsBinary,
 		template.HTML(contents),
 	}
 
@@ -237,37 +220,20 @@ func (h *handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := getRepositoryTree(repository, "")
+	blob, err := getRepositoryBlob(repository, vars["path"])
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
 	}
 
-	file, err := tree.File(vars["path"])
-	if err != nil {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
+	value := "text/plain; charset=utf-8"
+	if blob.IsBinary {
+		value = "application/octet-stream"
 	}
 
-	reader, err := file.Blob.Reader()
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	w.Header().Set("Content-Type", value)
 
-	binary, err := file.IsBinary()
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	if binary {
-		w.Header().Set("Content-Type", "application/octet-stream")
-	} else {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	}
-
-	_, err = io.Copy(w, reader)
+	_, err = io.Copy(w, blob.Reader)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return

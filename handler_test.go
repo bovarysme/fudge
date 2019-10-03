@@ -10,7 +10,7 @@ import (
 )
 
 func TestRepositoryNotFound(t *testing.T) {
-	cfg, err := config.NewConfig("config.yml")
+	cfg, err := config.NewConfig("testdata/config.yml")
 	if err != nil {
 		t.Fatal(err)
 	}

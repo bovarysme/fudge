@@ -13,30 +13,32 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
-type handler struct {
+type Handler struct {
+	Router *mux.Router
+
 	config *config.Config
-	router *mux.Router
 	tmpl   map[string]*template.Template
 }
 
-func NewHandler(cfg *config.Config) (*handler, error) {
-	h := &handler{
+func NewHandler(cfg *config.Config) (*Handler, error) {
+	h := &Handler{
+		Router: mux.NewRouter(),
+
 		config: cfg,
-		router: mux.NewRouter(),
 		tmpl:   make(map[string]*template.Template),
 	}
 
-	h.router.StrictSlash(true)
+	h.Router.StrictSlash(true)
 
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-	h.router.PathPrefix("/static/").Handler(static)
+	h.Router.PathPrefix("/static/").Handler(static)
 
-	h.router.HandleFunc("/", h.showHome)
-	h.router.HandleFunc("/{repository}/", h.showTree)
-	h.router.HandleFunc("/{repository}/commits", h.showCommits)
-	h.router.HandleFunc("/{repository}/tree/{path:.*}", h.showTree)
-	h.router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
-	h.router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
+	h.Router.HandleFunc("/", h.showHome)
+	h.Router.HandleFunc("/{repository}/", h.showTree)
+	h.Router.HandleFunc("/{repository}/commits", h.showCommits)
+	h.Router.HandleFunc("/{repository}/tree/{path:.*}", h.showTree)
+	h.Router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
+	h.Router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
 
 	pages := []string{"home", "commits", "tree", "blob", "404", "500"}
 	for _, page := range pages {
@@ -53,7 +55,7 @@ func NewHandler(cfg *config.Config) (*handler, error) {
 	return h, nil
 }
 
-func (h *handler) showError(w http.ResponseWriter, r *http.Request, status int, err error) {
+func (h *Handler) showError(w http.ResponseWriter, r *http.Request, status int, err error) {
 	w.WriteHeader(status)
 
 	switch status {
@@ -72,7 +74,7 @@ func (h *handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 	}
 }
 
-func (h *handler) showHome(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 	names, err := getRepositoryNames(h.config.Root)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
@@ -92,7 +94,7 @@ func (h *handler) showHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) showCommits(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	repository, err := openRepository(h.config.Root, vars["repository"])
@@ -126,7 +128,7 @@ func (h *handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) showTree(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	repository, err := openRepository(h.config.Root, vars["repository"])
@@ -173,7 +175,7 @@ func (h *handler) showTree(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	repository, err := openRepository(h.config.Root, vars["repository"])
@@ -221,7 +223,7 @@ func (h *handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handler) sendBlob(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	repository, err := openRepository(h.config.Root, vars["repository"])

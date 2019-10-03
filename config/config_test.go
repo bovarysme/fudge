@@ -5,7 +5,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	cfg, err := NewConfig("../testdata/config.yml")
+	cfg, err := NewConfig("testdata/config.yml")
 	if err != nil {
 		t.Fatal(err)
 	}

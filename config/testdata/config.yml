@@ -1,0 +1,5 @@
+# The path to search for git directories in
+root: ../
+
+# Run the application in debug mode
+debug: true

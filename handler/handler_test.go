@@ -3,11 +3,19 @@ package handler
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
 	"fudge/config"
 )
+
+func init() {
+	err := os.Chdir("..")
+	if err != nil {
+		panic(err)
+	}
+}
 
 func TestRepositoryNotFound(t *testing.T) {
 	cfg := &config.Config{

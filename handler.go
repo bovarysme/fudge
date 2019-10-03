@@ -34,7 +34,7 @@ func NewHandler() (*handler, error) {
 	h.router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
 	h.router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
 
-	pages := []string{"home", "commits", "tree", "blob"}
+	pages := []string{"home", "commits", "tree", "blob", "404", "500"}
 	for _, page := range pages {
 		path := fmt.Sprintf("template/%s.html", page)
 
@@ -50,11 +50,21 @@ func NewHandler() (*handler, error) {
 }
 
 func (h *handler) showError(w http.ResponseWriter, r *http.Request, status int, err error) {
+	w.WriteHeader(status)
+
 	switch status {
 	case http.StatusNotFound:
-		http.NotFound(w, r)
+		h.tmpl["404"].ExecuteTemplate(w, "layout", nil)
 	case http.StatusInternalServerError:
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		params := struct {
+			Debug bool
+			Error string
+		}{
+			true, // TODO: get value from config
+			err.Error(),
+		}
+
+		h.tmpl["500"].ExecuteTemplate(w, "layout", params)
 	}
 }
 

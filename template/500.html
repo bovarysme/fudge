@@ -1,0 +1,9 @@
+{{ define "content" }}
+<h2>Internal server error</h2>
+
+{{ if .Debug }}
+<p>{{ .Error }}<p>
+{{ else }}
+<p>The fudge has gone bad.</p>
+{{ end }}
+{{ end }}

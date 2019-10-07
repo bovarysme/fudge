@@ -41,11 +41,11 @@ a:hover {
   text-decoration: underline;
 }
 
-#repositories {
+.list-spaced {
   padding-left: 0;
 }
 
-#repositories li {
+.list-spaced li {
   margin-top: 1em;
   border-bottom: 1px #ccc solid;
   padding: 0 0.5em;
@@ -53,11 +53,11 @@ a:hover {
   list-style: none;
 }
 
-#repositories li p {
+.list-spaced li p {
   margin: 0;
 }
 
-#repositories li p:first-child {
+.list-spaced li p:first-child {
   margin-bottom: 1em;
 }
 

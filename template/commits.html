@@ -1,9 +1,13 @@
 {{ define "content" }}
-  <h2><a href="/{{ .Name }}">{{ .Name }}</a></h2>
+  <h2><a href="/{{ .Name }}">{{ .Name }}</a> / commits</h2>
 
-  <ul>
+  <ul class="list-spaced">
     {{ range .Commits }}
-      <li>{{ .Author.Name }} {{ .Message }} {{ .Author.When.Format "Jan 2, 2006" }}</li>
+      <li>
+        <p>{{ .Message }}</p>
+        <p><strong>{{ .Author.Name }}</strong> commited on
+          {{ .Author.When.Format "Jan 2, 2006" }}</p>
+      </li>
     {{ end }}
   </ul>
 {{ end }}

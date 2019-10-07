@@ -9,9 +9,9 @@
 
       {{ $description := index $.Descriptions . }}
       {{ if eq $description "" }}
-      <p><em>No description.</em></p>
+        <p><em>No description.</em></p>
       {{ else }}
-      <p>{{ $description }}</p>
+        <p>{{ $description }}</p>
       {{ end }}
     </li>
     {{ end }}

@@ -4,8 +4,8 @@
   <p><a href="/{{ .Name }}/commits">Commits</a></p>
 
   {{ if .Binary }}
-  <p>Binary file.</p>
+    <p>Binary file.</p>
   {{ else }}
-  {{ .Contents }}
+    {{ .Contents }}
   {{ end }}
 {{ end }}

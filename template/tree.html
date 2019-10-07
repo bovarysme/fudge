@@ -1,5 +1,5 @@
 {{ define "content" }}
-  <h2>{{ .Name }}{{ if .Path }}/{{ .Path }}{{ end }}</h2>
+  <h2>{{ template "breadcrumbs" . }}</h2>
 
   <p><a href="/{{ .Name }}/commits">Commits</a></p>
 

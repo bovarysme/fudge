@@ -1,0 +1,9 @@
+{{ define "breadcrumbs" }}
+  {{ range .Breadcrumbs }}
+    {{ if eq .Link "" }}
+      {{ .Text }}
+    {{ else }}
+      <a href="{{ .Link }}">{{ .Text }}</a> /
+    {{ end }}
+  {{ end }}
+{{ end }}

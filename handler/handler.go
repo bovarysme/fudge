@@ -8,7 +8,7 @@ import (
 
 	"fudge/config"
 	"fudge/git"
-	"fudge/syntax"
+	"fudge/util"
 
 	"github.com/gorilla/mux"
 	gogit "gopkg.in/src-d/go-git.v4"
@@ -46,7 +46,8 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 	for _, page := range pages {
 		path := fmt.Sprintf("template/%s.html", page)
 
-		t, err := template.ParseFiles("template/layout.html", path)
+		t, err := template.ParseFiles(
+			"template/layout.html", "template/breadcrumbs.html", path)
 		if err != nil {
 			return nil, err
 		}
@@ -162,13 +163,17 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
+
 	params := struct {
-		Name    string
-		Path    string
-		Objects []*git.TreeObject
+		Name        string
+		Path        string
+		Breadcrumbs []*util.Breadcrumb
+		Objects     []*git.TreeObject
 	}{
 		vars["repository"],
 		path,
+		crumbs,
 		objects,
 	}
 
@@ -198,10 +203,12 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
+
 	var contents string
 
 	if !blob.IsBinary {
-		contents, err = syntax.Highlight(blob.Name, blob.Reader)
+		contents, err = util.Highlight(blob.Name, blob.Reader)
 		if err != nil {
 			h.showError(w, r, http.StatusInternalServerError, err)
 			return
@@ -209,13 +216,15 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		Name     string
-		Path     string
-		Binary   bool
-		Contents template.HTML
+		Name        string
+		Path        string
+		Breadcrumbs []*util.Breadcrumb
+		Binary      bool
+		Contents    template.HTML
 	}{
 		vars["repository"],
 		vars["path"],
+		crumbs,
 		blob.IsBinary,
 		template.HTML(contents),
 	}

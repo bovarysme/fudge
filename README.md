@@ -2,7 +2,7 @@
 ## Usage
 
 - Move `config.example.yml` to `config.yml` and edit it.
-- Run `go run fudge`.
+- Run `go run main.go`.
 
 ## License
 

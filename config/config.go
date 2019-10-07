@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Root  string
-	Debug bool
+	Root         string
+	Debug        bool
+	Descriptions map[string]string
 }
 
 func NewConfig(path string) (*Config, error) {

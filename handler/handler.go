@@ -84,9 +84,11 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		Names []string
+		Names        []string
+		Descriptions map[string]string
 	}{
 		names,
+		h.config.Descriptions,
 	}
 
 	err = h.tmpl["home"].ExecuteTemplate(w, "layout", params)

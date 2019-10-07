@@ -1,5 +1,12 @@
-# The path to search for git directories in
+# The path to search for git repositories in
 root: /home/git/
 
 # Run the application in debug mode
 debug: false
+
+# The description of each git repository
+descriptions:
+  simple: A simple description
+  multi-line: |
+    A multiline description.
+    This is the second line.

@@ -33,12 +33,12 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+a, a:visited {
+  color: #733a59;
 }
 
-a, a:visited {
-  color: blue;
+a:hover {
+  text-decoration: underline;
 }
 
 #repositories {
@@ -59,4 +59,25 @@ a, a:visited {
 
 #repositories li p:first-child {
   margin-bottom: 1em;
+}
+
+#tree {
+  padding-left: 0;
+}
+
+#tree li {
+  margin-top: 0.5em;
+  border-bottom: 1px #ccc solid;
+  padding: 0 0.25em;
+  padding-bottom: 0.5em;
+  list-style: none;
+}
+
+#tree li span {
+  float: right;
+}
+
+#tree li img {
+  width: 16px;
+  height: 16px;
 }

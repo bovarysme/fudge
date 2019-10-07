@@ -1,5 +1,5 @@
 {{ define "content" }}
-  <h2>{{ .Name }}</h2>
+  <h2><a href="/{{ .Name }}">{{ .Name }}</a></h2>
 
   <ul>
     {{ range .Commits }}

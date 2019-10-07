@@ -3,14 +3,19 @@
 
   <p><a href="/{{ .Name }}/commits">Commits</a></p>
 
-  <ul>
+  <ul id="tree">
     {{ range .Objects }}
       {{ if .IsFile }}
-      <li><a href="/{{ $.Name }}/blob/{{ $.Path }}/{{ .Name }}">
-          {{ .Name }}</a> {{ .Size }}</li>
+        <li>
+          <img alt="Blob" src="/static/img/blob.svg">
+          <a href="/{{ $.Name }}/blob/{{ $.Path }}/{{ .Name }}">{{ .Name }}</a>
+          <span>{{ .Size }}</span>
+        </li>
       {{ else }}
-      <li><a href="/{{ $.Name }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">
-          {{ .Name }}</a></li>
+        <li>
+          <img alt="Tree" src="/static/img/tree.svg">
+          <a href="/{{ $.Name }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">{{ .Name }}</a>
+        </li>
       {{ end }}
     {{ end }}
   </ul>

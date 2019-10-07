@@ -2,8 +2,9 @@
   <h2>{{ template "breadcrumbs" . }}</h2>
 
   <p><a href="/{{ .Name }}/commits">Commits</a></p>
+  <p>{{ .Blob.Size }} | <a href="/{{ .Name }}/raw/{{ .Path }}">Download</a></p>
 
-  {{ if .Binary }}
+  {{ if .Blob.IsBinary }}
     <p>Binary file.</p>
   {{ else }}
     {{ .Contents }}

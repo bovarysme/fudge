@@ -20,6 +20,7 @@ type TreeObject struct {
 type TreeBlob struct {
 	Name     string
 	IsBinary bool
+	Size     string // The blob humanized size
 	Reader   io.ReadCloser
 }
 
@@ -130,6 +131,7 @@ func GetRepositoryBlob(repository *git.Repository, path string) (*TreeBlob, erro
 	blob := &TreeBlob{
 		Name:     file.Name,
 		IsBinary: isBinary,
+		Size:     humanize.Bytes(uint64(file.Blob.Size)),
 		Reader:   reader,
 	}
 

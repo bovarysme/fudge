@@ -219,13 +219,13 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		Name        string
 		Path        string
 		Breadcrumbs []*util.Breadcrumb
-		Binary      bool
+		Blob        *git.TreeBlob
 		Contents    template.HTML
 	}{
 		vars["repository"],
 		vars["path"],
 		crumbs,
-		blob.IsBinary,
+		blob,
 		template.HTML(contents),
 	}
 

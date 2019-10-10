@@ -49,6 +49,17 @@ div.chroma {
   margin-left: 0.5em;
 }
 
+.last-commit {
+  margin-bottom: 1.5em;
+  border: 1px #ccc solid;
+  border-radius: 3px;
+  padding: 0.5em;
+}
+
+.last-commit span {
+  float: right;
+}
+
 .list {
   padding-left: 0;
 }

@@ -1,0 +1,18 @@
+{{ define "breadcrumbs" }}
+  {{ range .Breadcrumbs }}
+    {{ if eq .Link "" }}
+      {{ .Text }}
+    {{ else }}
+      <a href="{{ .Link }}">{{ .Text }}</a> /
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+
+{{ define "last_commit" }}
+  <p class="last-commit">
+    <a href="/{{ .Name }}/commits">Commits</a> |
+    <strong>{{ .LastCommit.Author.Name }}</strong> {{ .LastCommit.Message }}
+    <span>Committed on {{ .LastCommit.Author.When.Format "Jan 2, 2006" }}</span>
+  </p>
+{{ end }}

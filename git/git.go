@@ -75,6 +75,20 @@ func GetRepositoryCommits(r *git.Repository) ([]*object.Commit, error) {
 	return commits, nil
 }
 
+func GetRepositoryLastCommit(r *git.Repository) (*object.Commit, error) {
+	head, err := r.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := r.CommitObject(head.Hash())
+	if err != nil {
+		return nil, err
+	}
+
+	return commit, nil
+}
+
 func GetRepositoryTree(repository *git.Repository, path string) (*object.Tree, error) {
 	head, err := repository.Head()
 	if err != nil {

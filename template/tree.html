@@ -1,7 +1,7 @@
 {{ define "content" }}
   <h2>{{ template "breadcrumbs" . }}</h2>
 
-  <p><a href="/{{ .Name }}/commits">Commits</a></p>
+  {{ template "last_commit" . }}
 
   <ul class="list">
     {{ range .Objects }}

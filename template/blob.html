@@ -1,7 +1,8 @@
 {{ define "content" }}
   <h2>{{ template "breadcrumbs" . }}</h2>
 
-  <p><a href="/{{ .Name }}/commits">Commits</a></p>
+  {{ template "last_commit" . }}
+
   <p class="details">{{ .Blob.Size }} | <a href="/{{ .Name }}/raw/{{ .Path }}">Download</a></p>
 
   {{ if .Blob.IsBinary }}

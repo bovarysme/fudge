@@ -47,7 +47,7 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 		path := fmt.Sprintf("template/%s.html", page)
 
 		t, err := template.ParseFiles(
-			"template/layout.html", "template/breadcrumbs.html", path)
+			"template/_layout.html", "template/_utils.html", path)
 		if err != nil {
 			return nil, err
 		}
@@ -165,15 +165,23 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 
 	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
 
+	commit, err := git.GetRepositoryLastCommit(repository)
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
 	params := struct {
 		Name        string
 		Path        string
 		Breadcrumbs []*util.Breadcrumb
+		LastCommit  *object.Commit
 		Objects     []*git.TreeObject
 	}{
 		vars["repository"],
 		path,
 		crumbs,
+		commit,
 		objects,
 	}
 
@@ -203,8 +211,6 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
-
 	var contents string
 
 	if !blob.IsBinary {
@@ -215,16 +221,26 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
+
+	commit, err := git.GetRepositoryLastCommit(repository)
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
 	params := struct {
 		Name        string
 		Path        string
 		Breadcrumbs []*util.Breadcrumb
+		LastCommit  *object.Commit
 		Blob        *git.TreeBlob
 		Contents    template.HTML
 	}{
 		vars["repository"],
 		vars["path"],
 		crumbs,
+		commit,
 		blob,
 		template.HTML(contents),
 	}

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/dustin/go-humanize"
 	"gopkg.in/src-d/go-git.v4"
@@ -62,8 +63,9 @@ func GetRepositoryCommits(r *git.Repository) ([]*object.Commit, error) {
 
 	var commits []*object.Commit
 
-	// TODO: paginate using NewFilterCommitIter
 	err = iter.ForEach(func(c *object.Commit) error {
+		// XXX
+		c.Message = strings.Split(c.Message, "\n")[0]
 		commits = append(commits, c)
 
 		return nil
@@ -85,6 +87,9 @@ func GetRepositoryLastCommit(r *git.Repository) (*object.Commit, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// XXX
+	commit.Message = strings.Split(commit.Message, "\n")[0]
 
 	return commit, nil
 }

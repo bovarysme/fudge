@@ -8,13 +8,13 @@
       {{ if .IsFile }}
         <li>
           <img alt="Blob" src="/static/img/blob.svg">
-          <a href="/{{ $.Name }}/blob/{{ $.Path }}/{{ .Name }}">{{ .Name }}</a>
+          <a href="/{{ $.RepoName }}/blob/{{ $.Path }}/{{ .Name }}">{{ .Name }}</a>
           <span>{{ .Size }}</span>
         </li>
       {{ else }}
         <li>
           <img alt="Tree" src="/static/img/tree.svg">
-          <a href="/{{ $.Name }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">{{ .Name }}</a>
+          <a href="/{{ $.RepoName }}/tree/{{ $.Path }}/{{ .Name }}" class="tree">{{ .Name }}</a>
         </li>
       {{ end }}
     {{ end }}

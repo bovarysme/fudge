@@ -3,7 +3,7 @@
 
   {{ template "last_commit" . }}
 
-  <p class="details">{{ .Blob.Size }} | <a href="/{{ .Name }}/raw/{{ .Path }}">Download</a></p>
+  <p class="details">{{ .Blob.Size }} | <a href="/{{ .RepoName }}/raw/{{ .Path }}">Download</a></p>
 
   {{ if .Blob.IsBinary }}
     <p>Binary file.</p>

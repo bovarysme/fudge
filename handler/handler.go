@@ -119,8 +119,8 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		Name    string
-		Commits []*object.Commit
+		RepoName string
+		Commits  []*object.Commit
 	}{
 		vars["repository"],
 		commits,
@@ -172,7 +172,7 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		Name        string
+		RepoName    string
 		Path        string
 		Breadcrumbs []*util.Breadcrumb
 		LastCommit  *object.Commit
@@ -230,7 +230,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := struct {
-		Name        string
+		RepoName    string
 		Path        string
 		Breadcrumbs []*util.Breadcrumb
 		LastCommit  *object.Commit

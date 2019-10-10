@@ -11,7 +11,7 @@
 
 {{ define "last_commit" }}
   <p class="last-commit">
-    <a href="/{{ .Name }}/commits">Commits</a> |
+    <a href="/{{ .RepoName }}/commits">Commits</a> |
     <strong>{{ .LastCommit.Author.Name }}</strong> {{ .LastCommit.Message }}
     <span>Committed on {{ .LastCommit.Author.When.Format "Jan 2, 2006" }}</span>
   </p>

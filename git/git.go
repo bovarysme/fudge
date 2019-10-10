@@ -89,13 +89,13 @@ func GetRepositoryLastCommit(r *git.Repository) (*object.Commit, error) {
 	return commit, nil
 }
 
-func GetRepositoryTree(repository *git.Repository, path string) (*object.Tree, error) {
-	head, err := repository.Head()
+func GetRepositoryTree(r *git.Repository, path string) (*object.Tree, error) {
+	head, err := r.Head()
 	if err != nil {
 		return nil, err
 	}
 
-	commit, err := repository.CommitObject(head.Hash())
+	commit, err := r.CommitObject(head.Hash())
 	if err != nil {
 		return nil, err
 	}
@@ -115,13 +115,13 @@ func GetRepositoryTree(repository *git.Repository, path string) (*object.Tree, e
 	return tree, nil
 }
 
-func GetRepositoryBlob(repository *git.Repository, path string) (*TreeBlob, error) {
+func GetRepositoryBlob(r *git.Repository, path string) (*TreeBlob, error) {
 	dir := filepath.Dir(path)
 	if dir == "." {
 		dir = ""
 	}
 
-	tree, err := GetRepositoryTree(repository, dir)
+	tree, err := GetRepositoryTree(r, dir)
 	if err != nil {
 		return nil, err
 	}

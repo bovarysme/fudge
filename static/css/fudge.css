@@ -41,6 +41,35 @@ a:hover {
   text-decoration: underline;
 }
 
+div.chroma {
+  padding: 1em;
+}
+
+.details {
+  margin-left: 0.5em;
+}
+
+.list {
+  padding-left: 0;
+}
+
+.list li {
+  margin-top: 0.5em;
+  border-bottom: 1px #ccc solid;
+  padding: 0 0.25em;
+  padding-bottom: 0.5em;
+  list-style: none;
+}
+
+.list li span {
+  float: right;
+}
+
+.list li img {
+  width: 16px;
+  height: 16px;
+}
+
 .list-spaced {
   padding-left: 0;
 }
@@ -59,25 +88,4 @@ a:hover {
 
 .list-spaced li p:first-child {
   margin-bottom: 1em;
-}
-
-#tree {
-  padding-left: 0;
-}
-
-#tree li {
-  margin-top: 0.5em;
-  border-bottom: 1px #ccc solid;
-  padding: 0 0.25em;
-  padding-bottom: 0.5em;
-  list-style: none;
-}
-
-#tree li span {
-  float: right;
-}
-
-#tree li img {
-  width: 16px;
-  height: 16px;
 }

@@ -3,7 +3,7 @@
 
   <p><a href="/{{ .Name }}/commits">Commits</a></p>
 
-  <ul id="tree">
+  <ul class="list">
     {{ range .Objects }}
       {{ if .IsFile }}
         <li>

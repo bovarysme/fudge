@@ -48,8 +48,7 @@ div.chroma {
 .details {
   margin-bottom: 0;
   border: 1px #ccc solid;
-  border-bottom: none;
-  border-radius: 3px;
+  border-radius: 3px 3px 0 0;
   padding: 0.5em;
 }
 

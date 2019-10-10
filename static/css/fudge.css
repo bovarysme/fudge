@@ -46,11 +46,14 @@ div.chroma {
 }
 
 .details {
-  margin-left: 0.5em;
+  margin-bottom: 0;
+  border: 1px #ccc solid;
+  border-bottom: none;
+  border-radius: 3px;
+  padding: 0.5em;
 }
 
 .last-commit {
-  margin-bottom: 1.5em;
   border: 1px #ccc solid;
   border-radius: 3px;
   padding: 0.5em;

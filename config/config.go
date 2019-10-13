@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Domain       string            `yaml:"domain"`
 	GitURL       string            `yaml:"git-url"`
-	Root         string            `yaml:"root"`
+	RepoRoot     string            `yaml:"repo-root"`
 	Debug        bool              `yaml:"debug"`
 	Descriptions map[string]string `yaml:"descriptions"`
 }

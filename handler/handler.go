@@ -78,7 +78,7 @@ func (h *Handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 }
 
 func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
-	names, err := git.GetRepositoryNames(h.config.Root)
+	names, err := git.GetRepositoryNames(h.config.RepoRoot)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
@@ -102,7 +102,7 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
 	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -136,7 +136,7 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
 	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -195,7 +195,7 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
 	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return
@@ -255,7 +255,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	repository, err := git.OpenRepository(h.config.Root, vars["repository"])
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
 	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return

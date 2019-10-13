@@ -19,8 +19,8 @@ func init() {
 
 func TestRepositoryNotFound(t *testing.T) {
 	cfg := &config.Config{
-		Root:  "../",
-		Debug: true,
+		RepoRoot: "../",
+		Debug:    true,
 	}
 
 	h, err := NewHandler(cfg)

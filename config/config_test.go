@@ -21,8 +21,8 @@ func TestConfig(t *testing.T) {
 	}
 
 	want = "/home/git/"
-	if cfg.Root != want {
-		t.Errorf("wrong root value: got %v want %v", cfg.Root, want)
+	if cfg.RepoRoot != want {
+		t.Errorf("wrong root value: got %v want %v", cfg.RepoRoot, want)
 	}
 
 	if !cfg.Debug {

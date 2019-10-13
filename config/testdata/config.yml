@@ -13,7 +13,7 @@ git-url: https://git.example.org
 
 # The path to search for Git repositories in. Fudge will *not* recurse into its
 # subdirectories.
-root: /home/git/
+repo-root: /home/git/
 
 # If set to `true`, the application will run in debug mode.
 debug: true

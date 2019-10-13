@@ -155,12 +155,7 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path, ok := vars["path"]
-	if !ok {
-		path = ""
-	}
-
-	tree, err := git.GetRepositoryTree(repository, path)
+	tree, err := git.GetRepositoryTree(repository, vars["path"])
 	if err != nil {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return

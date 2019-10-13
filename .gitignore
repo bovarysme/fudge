@@ -1,3 +1,6 @@
+# Go
+build/
+
 # fudge
 /config.yml
 TODO.md

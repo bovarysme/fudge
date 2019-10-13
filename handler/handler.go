@@ -12,7 +12,6 @@ import (
 
 	"github.com/gorilla/mux"
 	gogit "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 type Handler struct {
@@ -58,6 +57,26 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 	return h, nil
 }
 
+func (h *Handler) getParams(r *http.Request) map[string]interface{} {
+	vars := mux.Vars(r)
+
+	repository := vars["repository"]
+	path := vars["path"]
+
+	params := make(map[string]interface{})
+
+	params["Domain"] = h.config.Domain
+	params["GitURL"] = h.config.GitURL
+	params["RepoName"] = repository
+	params["Path"] = path
+
+	if repository != "" {
+		params["Breadcrumbs"] = util.Breadcrumbs(repository, path)
+	}
+
+	return params
+}
+
 func (h *Handler) showError(w http.ResponseWriter, r *http.Request, status int, err error) {
 	w.WriteHeader(status)
 
@@ -65,13 +84,10 @@ func (h *Handler) showError(w http.ResponseWriter, r *http.Request, status int, 
 	case http.StatusNotFound:
 		h.tmpl["404"].ExecuteTemplate(w, "layout", nil)
 	case http.StatusInternalServerError:
-		params := struct {
-			Debug bool
-			Error string
-		}{
-			h.config.Debug,
-			err.Error(),
-		}
+		params := h.getParams(r)
+
+		params["Debug"] = h.config.Debug
+		params["Error"] = err.Error()
 
 		h.tmpl["500"].ExecuteTemplate(w, "layout", params)
 	}
@@ -84,13 +100,10 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := struct {
-		Names        []string
-		Descriptions map[string]string
-	}{
-		names,
-		h.config.Descriptions,
-	}
+	params := h.getParams(r)
+
+	params["Names"] = names
+	params["Descriptions"] = h.config.Descriptions
 
 	err = h.tmpl["home"].ExecuteTemplate(w, "layout", params)
 	if err != nil {
@@ -118,13 +131,9 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := struct {
-		RepoName string
-		Commits  []*object.Commit
-	}{
-		vars["repository"],
-		commits,
-	}
+	params := h.getParams(r)
+
+	params["Commits"] = commits
 
 	err = h.tmpl["commits"].ExecuteTemplate(w, "layout", params)
 	if err != nil {
@@ -163,27 +172,16 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
-
 	commit, err := git.GetRepositoryLastCommit(repository)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	params := struct {
-		RepoName    string
-		Path        string
-		Breadcrumbs []*util.Breadcrumb
-		LastCommit  *object.Commit
-		Objects     []*git.TreeObject
-	}{
-		vars["repository"],
-		path,
-		crumbs,
-		commit,
-		objects,
-	}
+	params := h.getParams(r)
+
+	params["LastCommit"] = commit
+	params["Objects"] = objects
 
 	err = h.tmpl["tree"].ExecuteTemplate(w, "layout", params)
 	if err != nil {
@@ -221,29 +219,17 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	crumbs := util.Breadcrumbs(vars["repository"], vars["path"])
-
 	commit, err := git.GetRepositoryLastCommit(repository)
 	if err != nil {
 		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	params := struct {
-		RepoName    string
-		Path        string
-		Breadcrumbs []*util.Breadcrumb
-		LastCommit  *object.Commit
-		Blob        *git.TreeBlob
-		Contents    template.HTML
-	}{
-		vars["repository"],
-		vars["path"],
-		crumbs,
-		commit,
-		blob,
-		template.HTML(contents),
-	}
+	params := h.getParams(r)
+
+	params["LastCommit"] = commit
+	params["Blob"] = blob
+	params["Contents"] = template.HTML(contents)
 
 	err = h.tmpl["blob"].ExecuteTemplate(w, "layout", params)
 	if err != nil {

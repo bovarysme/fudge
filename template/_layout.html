@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{ if and .Domain .GitURL .RepoName }}
+    <meta name="go-import" content="{{ .Domain }}/{{ .RepoName }} git {{ .GitURL }}/{{ .RepoName }}">
+  {{ end }}
 
   <title>Fudge</title>
 

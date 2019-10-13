@@ -105,11 +105,7 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 	params["Names"] = names
 	params["Descriptions"] = h.config.Descriptions
 
-	err = h.tmpl["home"].ExecuteTemplate(w, "layout", params)
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	h.tmpl["home"].ExecuteTemplate(w, "layout", params)
 }
 
 func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
@@ -135,11 +131,7 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 
 	params["Commits"] = commits
 
-	err = h.tmpl["commits"].ExecuteTemplate(w, "layout", params)
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	h.tmpl["commits"].ExecuteTemplate(w, "layout", params)
 }
 
 func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
@@ -178,11 +170,7 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 	params["LastCommit"] = commit
 	params["Objects"] = objects
 
-	err = h.tmpl["tree"].ExecuteTemplate(w, "layout", params)
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	h.tmpl["tree"].ExecuteTemplate(w, "layout", params)
 }
 
 func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
@@ -226,11 +214,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 	params["Blob"] = blob
 	params["Contents"] = template.HTML(contents)
 
-	err = h.tmpl["blob"].ExecuteTemplate(w, "layout", params)
-	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
-		return
-	}
+	h.tmpl["blob"].ExecuteTemplate(w, "layout", params)
 }
 
 func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {

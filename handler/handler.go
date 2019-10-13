@@ -57,6 +57,22 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 	return h, nil
 }
 
+func (h *Handler) openRepository(w http.ResponseWriter, r *http.Request) (*gogit.Repository, error) {
+	vars := mux.Vars(r)
+
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
+	if err == gogit.ErrRepositoryNotExists {
+		h.showError(w, r, http.StatusNotFound, nil)
+		return nil, err
+	}
+	if err != nil {
+		h.showError(w, r, http.StatusInternalServerError, err)
+		return nil, err
+	}
+
+	return repository, nil
+}
+
 func (h *Handler) getParams(r *http.Request) map[string]interface{} {
 	vars := mux.Vars(r)
 
@@ -109,15 +125,8 @@ func (h *Handler) showHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
-	if err == gogit.ErrRepositoryNotExists {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
+	repository, err := h.openRepository(w, r)
 	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -135,17 +144,12 @@ func (h *Handler) showCommits(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
-	if err == gogit.ErrRepositoryNotExists {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
+	repository, err := h.openRepository(w, r)
 	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	vars := mux.Vars(r)
 
 	tree, err := git.GetRepositoryTree(repository, vars["path"])
 	if err != nil {
@@ -174,17 +178,12 @@ func (h *Handler) showTree(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
-	if err == gogit.ErrRepositoryNotExists {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
+	repository, err := h.openRepository(w, r)
 	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	vars := mux.Vars(r)
 
 	blob, err := git.GetRepositoryBlob(repository, vars["path"])
 	if err != nil {
@@ -192,8 +191,7 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var contents string
-
+	contents := ""
 	if !blob.IsBinary {
 		contents, err = util.Highlight(blob.Name, blob.Reader)
 		if err != nil {
@@ -218,17 +216,12 @@ func (h *Handler) showBlob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) sendBlob(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
-	if err == gogit.ErrRepositoryNotExists {
-		h.showError(w, r, http.StatusNotFound, nil)
-		return
-	}
+	repository, err := h.openRepository(w, r)
 	if err != nil {
-		h.showError(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	vars := mux.Vars(r)
 
 	blob, err := git.GetRepositoryBlob(repository, vars["path"])
 	if err != nil {

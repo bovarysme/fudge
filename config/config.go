@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	Root         string
-	Debug        bool
-	Descriptions map[string]string
+	Domain       string            `yaml:"domain"`
+	GitURL       string            `yaml:"git-url"`
+	Root         string            `yaml:"root"`
+	Debug        bool              `yaml:"debug"`
+	Descriptions map[string]string `yaml:"descriptions"`
 }
 
 func NewConfig(path string) (*Config, error) {

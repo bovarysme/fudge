@@ -10,8 +10,19 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if cfg.Root != "../" {
-		t.Errorf("wrong root value: got %v want %v", cfg.Root, "../")
+	want := "fudge.example.org"
+	if cfg.Domain != want {
+		t.Errorf("wrong domain value: got %v want %v", cfg.Domain, want)
+	}
+
+	want = "https://git.example.org"
+	if cfg.GitURL != want {
+		t.Errorf("wrong git-url value: got %v want %v", cfg.GitURL, want)
+	}
+
+	want = "/home/git/"
+	if cfg.Root != want {
+		t.Errorf("wrong root value: got %v want %v", cfg.Root, want)
 	}
 
 	if !cfg.Debug {

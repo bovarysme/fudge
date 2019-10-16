@@ -102,3 +102,15 @@ div.chroma {
 .list-spaced li p:first-child {
   margin-bottom: 1em;
 }
+
+@media screen and (max-width: 1024px) {
+  main {
+    margin: 0 1em;
+  }
+
+  .last-commit span {
+    float: none;
+    display: block;
+    padding-top: 0.5em;
+  }
+}

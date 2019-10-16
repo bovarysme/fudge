@@ -3,6 +3,9 @@
 ### Added
 
 - Create tarballs when building
+- Strip the `.git` suffix when displaying names of repositories
+- If a repository cannot be found, add a `.git` suffix to its name and try to
+  reopen it
 
 ## v0.2.0 - 2019-10-13
 ### Added

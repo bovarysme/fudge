@@ -60,7 +60,7 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 func (h *Handler) openRepository(w http.ResponseWriter, r *http.Request) (*gogit.Repository, error) {
 	vars := mux.Vars(r)
 
-	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"])
+	repository, err := git.OpenRepository(h.config.RepoRoot, vars["repository"], false)
 	if err == gogit.ErrRepositoryNotExists {
 		h.showError(w, r, http.StatusNotFound, nil)
 		return nil, err

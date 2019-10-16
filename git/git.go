@@ -3,6 +3,7 @@ package git
 import (
 	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -25,8 +26,19 @@ type TreeBlob struct {
 	Reader   io.ReadCloser
 }
 
-func OpenRepository(root, filename string) (*git.Repository, error) {
-	path := filepath.Join(root, filename)
+// OpenRepository opens a Git repository from the given root path and dirname.
+// If strict is set to false, OpenRepository will try to open dirname first,
+// then dirname with a ".git" suffix.
+func OpenRepository(root, dirname string, strict bool) (*git.Repository, error) {
+	path := filepath.Join(root, dirname)
+
+	_, err := os.Stat(path)
+	if strict && os.IsNotExist(err) {
+		return nil, git.ErrRepositoryNotExists
+	} else if os.IsNotExist(err) {
+		path = filepath.Join(root, dirname+".git")
+	}
+
 	repository, err := git.PlainOpen(path)
 
 	return repository, err
@@ -41,7 +53,7 @@ func GetRepositoryNames(root string) ([]string, error) {
 	var names []string
 
 	for _, file := range files {
-		_, err := OpenRepository(root, file.Name())
+		_, err := OpenRepository(root, file.Name(), true)
 		if err == git.ErrRepositoryNotExists {
 			continue
 		}
@@ -49,7 +61,9 @@ func GetRepositoryNames(root string) ([]string, error) {
 			return nil, err
 		}
 
-		names = append(names, file.Name())
+		name := strings.TrimSuffix(file.Name(), ".git")
+
+		names = append(names, name)
 	}
 
 	return names, nil

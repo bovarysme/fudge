@@ -7,6 +7,10 @@
 - If a repository cannot be found, add a `.git` suffix to its name and try to
   reopen it
 
+### Changed
+
+- Use and enforce vanity import paths
+
 ## v0.2.0 - 2019-10-13
 ### Added
 

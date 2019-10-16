@@ -1,4 +1,4 @@
-module fudge
+module bovarys.me/fudge
 
 go 1.13
 

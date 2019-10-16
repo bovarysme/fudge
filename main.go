@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"fudge/config"
-	"fudge/handler"
+	"bovarys.me/fudge/config"
+	"bovarys.me/fudge/handler"
 )
 
 var configPath string

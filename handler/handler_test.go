@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"fudge/config"
+	"bovarys.me/fudge/config"
 )
 
 func init() {

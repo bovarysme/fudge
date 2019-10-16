@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"fudge/config"
-	"fudge/git"
-	"fudge/util"
+	"bovarys.me/fudge/config"
+	"bovarys.me/fudge/git"
+	"bovarys.me/fudge/util"
 
 	"github.com/gorilla/mux"
 	gogit "gopkg.in/src-d/go-git.v4"

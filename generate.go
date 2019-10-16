@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"fudge/util"
+	"bovarys.me/fudge/util"
 )
 
 func main() {

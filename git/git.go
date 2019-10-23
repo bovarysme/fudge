@@ -26,17 +26,28 @@ type TreeBlob struct {
 	Reader   io.ReadCloser
 }
 
+func isNotCandidate(path string) bool {
+	file, err := os.Stat(path)
+	isRegularFile := !os.IsNotExist(err) && !file.IsDir()
+
+	return isRegularFile || os.IsNotExist(err)
+}
+
 // OpenRepository opens a Git repository from the given root path and dirname.
 // If strict is set to false, OpenRepository will try to open dirname first,
 // then dirname with a ".git" suffix.
 func OpenRepository(root, dirname string, strict bool) (*git.Repository, error) {
 	path := filepath.Join(root, dirname)
 
-	_, err := os.Stat(path)
-	if strict && os.IsNotExist(err) {
-		return nil, git.ErrRepositoryNotExists
-	} else if os.IsNotExist(err) {
+	if isNotCandidate(path) {
+		if strict {
+			return nil, git.ErrRepositoryNotExists
+		}
+
 		path = filepath.Join(root, dirname+".git")
+		if isNotCandidate(path) {
+			return nil, git.ErrRepositoryNotExists
+		}
 	}
 
 	repository, err := git.PlainOpen(path)
@@ -53,6 +64,10 @@ func GetRepositoryNames(root string) ([]string, error) {
 	var names []string
 
 	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+
 		_, err := OpenRepository(root, file.Name(), true)
 		if err == git.ErrRepositoryNotExists {
 			continue

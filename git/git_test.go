@@ -86,3 +86,38 @@ func TestGetRepositoryCommits(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRepositoryLastCommit(t *testing.T) {
+	r, err := OpenRepository("testdata/repository", "python", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := GetRepositoryLastCommit(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := struct {
+		name    string
+		when    string
+		message string
+	}{
+		"Jane Doe",
+		"Oct 24, 2019",
+		"Edit README.md",
+	}
+
+	if got.Author.Name != want.name {
+		t.Errorf("wrong commit author name: got %s want %s", got.Author.Name, want.name)
+	}
+
+	when := got.Author.When.Format("Jan 2, 2006")
+	if when != want.when {
+		t.Errorf("wrong commit author when: got %s want %s", when, want.when)
+	}
+
+	if got.Message != want.message {
+		t.Errorf("wrong commit message: got %s want %s", got.Message, want.message)
+	}
+}

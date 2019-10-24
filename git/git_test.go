@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 func TestOpenRepository(t *testing.T) {
@@ -23,7 +24,7 @@ func TestOpenRepository(t *testing.T) {
 	for _, test := range tests {
 		_, err := OpenRepository(test.root, test.dirname, test.strict)
 		if err != test.err {
-			t.Errorf("error when openning %s/%s (strict: %v): got %v want %v",
+			t.Errorf("wrong error when openning %s/%s (strict: %v): got %v want %v",
 				test.root, test.dirname, test.strict, err, test.err)
 		}
 	}
@@ -119,5 +120,32 @@ func TestGetRepositoryLastCommit(t *testing.T) {
 
 	if got.Message != want.message {
 		t.Errorf("wrong commit message: got %s want %s", got.Message, want.message)
+	}
+}
+
+func TestGetRepositoryTree(t *testing.T) {
+	r, err := OpenRepository("testdata/repository", "python", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		path string
+		err  error
+	}{
+		{"nonexistent", object.ErrDirectoryNotFound},
+		{"/", object.ErrDirectoryNotFound},
+		{"src/", object.ErrDirectoryNotFound},
+		{"", nil},
+		{"src", nil},
+		{"src/helpers", nil},
+	}
+
+	for _, test := range tests {
+		_, err = GetRepositoryTree(r, test.path)
+		if err != test.err {
+			t.Errorf("wrong error when getting tree %s: got %v want %v",
+				test.path, err, test.err)
+		}
 	}
 }

@@ -27,6 +27,7 @@ header a:hover {
 main {
   max-width: 64em;
   margin: auto;
+  margin-bottom: 2em;
 }
 
 a {
@@ -106,6 +107,7 @@ div.chroma {
 @media screen and (max-width: 1024px) {
   main {
     margin: 0 1em;
+    margin-bottom: 1em;
   }
 
   .last-commit span {

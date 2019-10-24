@@ -23,8 +23,27 @@ func TestOpenRepository(t *testing.T) {
 	for _, test := range tests {
 		_, err := OpenRepository(test.root, test.dirname, test.strict)
 		if err != test.err {
-			t.Errorf("error when openning %s/%s (strict: %v): got %v, want %v",
+			t.Errorf("error when openning %s/%s (strict: %v): got %v want %v",
 				test.root, test.dirname, test.strict, err, test.err)
+		}
+	}
+}
+
+func TestGetRepositoryNames(t *testing.T) {
+	want := []string{"normal", "suffix"}
+
+	got, err := GetRepositoryNames("testdata/repositories")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != len(want) {
+		t.Fatalf("wrong slice length: got %d want %d", len(got), len(want))
+	}
+
+	for i, name := range got {
+		if name != want[i] {
+			t.Errorf("wrong repository name: got %s want %s", name, want[i])
 		}
 	}
 }

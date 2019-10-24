@@ -47,3 +47,42 @@ func TestGetRepositoryNames(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRepositoryCommits(t *testing.T) {
+	r, err := OpenRepository("testdata/repository", "python", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := GetRepositoryCommits(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []struct {
+		name    string
+		when    string
+		message string
+	}{
+		{"Jane Doe", "Oct 24, 2019", "Edit README.md"},
+		{"Jane Doe", "Oct 24, 2019", "Add tests"},
+		{"Jane Doe", "Oct 24, 2019", "Initial commit"},
+	}
+
+	for i, commit := range got {
+		if commit.Author.Name != want[i].name {
+			t.Errorf("wrong commit author name: got %s want %s",
+				commit.Author.Name, want[i].name)
+		}
+
+		when := commit.Author.When.Format("Jan 2, 2006")
+		if when != want[i].when {
+			t.Errorf("wrong commit author when: got %s want %s", when, want[i].when)
+		}
+
+		if commit.Message != want[i].message {
+			t.Errorf("wrong commit message: got %s want %s",
+				commit.Message, want[i].message)
+		}
+	}
+}

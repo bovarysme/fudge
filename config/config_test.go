@@ -1,10 +1,21 @@
 package config
 
 import (
+	"os"
 	"testing"
 )
 
 func TestConfig(t *testing.T) {
+	_, err := NewConfig("testdata/nonexistent.yml")
+	if !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+
+	_, err = NewConfig("testdata/invalid.yml")
+	if err == nil {
+		t.Fatal(err)
+	}
+
 	cfg, err := NewConfig("testdata/config.yml")
 	if err != nil {
 		t.Fatal(err)

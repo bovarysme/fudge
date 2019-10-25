@@ -31,15 +31,15 @@ func TestOpenRepository(t *testing.T) {
 }
 
 func TestGetRepositoryNames(t *testing.T) {
-	want := []string{"normal", "suffix"}
-
 	got, err := GetRepositoryNames("testdata/repositories")
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	want := []string{"normal", "suffix"}
+
 	if len(got) != len(want) {
-		t.Fatalf("wrong slice length: got %d want %d", len(got), len(want))
+		t.Fatalf("wrong number of repositories: got %d want %d", len(got), len(want))
 	}
 
 	for i, name := range got {
@@ -68,6 +68,10 @@ func TestGetRepositoryCommits(t *testing.T) {
 		{"Jane Doe", "Oct 24, 2019", "Edit README.md"},
 		{"Jane Doe", "Oct 24, 2019", "Add tests"},
 		{"Jane Doe", "Oct 24, 2019", "Initial commit"},
+	}
+
+	if len(got) != len(want) {
+		t.Fatalf("wrong number of commits: got %d want %d", len(got), len(want))
 	}
 
 	for i, commit := range got {
@@ -171,6 +175,47 @@ func TestGetRepositoryBlob(t *testing.T) {
 		if err != test.err {
 			t.Errorf("wrong error when getting blob %s: got %v want %v",
 				test.path, err, test.err)
+		}
+	}
+}
+
+func TestGetTreeObjects(t *testing.T) {
+	r, err := OpenRepository("testdata/repository", "python", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tree, err := GetRepositoryTree(r, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := GetTreeObjects(tree)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []struct {
+		name   string
+		isFile bool
+	}{
+		{"src", false},
+		{"tests", false},
+		{"README.md", true},
+	}
+
+	if len(got) != len(want) {
+		t.Fatalf("wrong number of objects: got %d want %d", len(got), len(want))
+	}
+
+	for i, obj := range got {
+		if obj.Name != want[i].name {
+			t.Errorf("wrong object name: got %s want %s", obj.Name, want[i].name)
+		}
+
+		if obj.IsFile != want[i].isFile {
+			t.Errorf("wrong object file status: got %v want %v",
+				obj.IsFile, want[i].isFile)
 		}
 	}
 }

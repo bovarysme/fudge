@@ -13,17 +13,17 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
-type TreeObject struct {
-	Name   string
-	IsFile bool
-	Size   string // The object humanized size
-}
-
-type TreeBlob struct {
+type Blob struct {
 	Name     string
 	IsBinary bool
 	Size     string // The blob humanized size
 	Reader   io.ReadCloser
+}
+
+type TreeObject struct {
+	Name   string
+	IsFile bool
+	Size   string // The object humanized size
 }
 
 func isNotCandidate(path string) bool {
@@ -149,7 +149,7 @@ func GetRepositoryTree(r *git.Repository, path string) (*object.Tree, error) {
 	return tree, nil
 }
 
-func GetRepositoryBlob(r *git.Repository, path string) (*TreeBlob, error) {
+func GetRepositoryBlob(r *git.Repository, path string) (*Blob, error) {
 	dir := filepath.Dir(path)
 	if dir == "." {
 		dir = ""
@@ -176,7 +176,7 @@ func GetRepositoryBlob(r *git.Repository, path string) (*TreeBlob, error) {
 		return nil, err
 	}
 
-	blob := &TreeBlob{
+	blob := &Blob{
 		Name:     file.Name,
 		IsBinary: isBinary,
 		Size:     humanize.Bytes(uint64(file.Blob.Size)),

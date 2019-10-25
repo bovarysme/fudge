@@ -1,7 +1,7 @@
 APP=fudge
 OUTPUT=build
 
-.PHONY: all checksum clean generate linux-amd64 openbsd-amd64
+.PHONY: all checksum clean coverage generate linux-amd64 openbsd-amd64 test
 
 all: linux-amd64 openbsd-amd64 checksum
 
@@ -25,3 +25,9 @@ checksum:
 
 clean:
 	rm -rf $(OUTPUT)/$(APP)-* $(OUTPUT)/sha256sum.txt
+
+test:
+	go test -coverprofile=cover.out ./...
+
+coverage: test
+	go tool cover -html=cover.out

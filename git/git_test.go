@@ -149,3 +149,28 @@ func TestGetRepositoryTree(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRepositoryBlob(t *testing.T) {
+	r, err := OpenRepository("testdata/repository", "python", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		path string
+		err  error
+	}{
+		{"nonexistent", object.ErrFileNotFound},
+		{"README.md", nil},
+		{"src/hello.py", nil},
+		{"src/helpers/helpers.py", nil},
+	}
+
+	for _, test := range tests {
+		_, err = GetRepositoryBlob(r, test.path)
+		if err != test.err {
+			t.Errorf("wrong error when getting blob %s: got %v want %v",
+				test.path, err, test.err)
+		}
+	}
+}

@@ -12,7 +12,7 @@ type Breadcrumb struct {
 
 func Breadcrumbs(name, path string) []*Breadcrumb {
 	crumbs := []*Breadcrumb{
-		&Breadcrumb{
+		{
 			Text: name,
 			Link: fmt.Sprintf("/%s", name),
 		},

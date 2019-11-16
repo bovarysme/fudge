@@ -1,5 +1,7 @@
 # fudge
 
+![CI status badge](https://github.com/bovarysme/fudge/workflows/CI/badge.svg)
+
 The delicious Git WebUI.
 
 ![Screenshot](docs/fudge.png)

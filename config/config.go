@@ -6,12 +6,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type LoggerConfig struct {
+	Enable   bool   `yaml:"enable"`
+	Mode     string `yaml:"mode"`
+	Path     string `yaml:"path"`
+	Priority string `yaml:"priority"`
+}
+
 type Config struct {
-	Domain       string            `yaml:"domain"`
-	GitURL       string            `yaml:"git-url"`
-	RepoRoot     string            `yaml:"repo-root"`
-	Debug        bool              `yaml:"debug"`
-	Descriptions map[string]string `yaml:"descriptions"`
+	Domain       string                  `yaml:"domain"`
+	GitURL       string                  `yaml:"git-url"`
+	RepoRoot     string                  `yaml:"repo-root"`
+	Debug        bool                    `yaml:"debug"`
+	Descriptions map[string]string       `yaml:"descriptions"`
+	Loggers      map[string]LoggerConfig `yaml:"loggers"`
 }
 
 func NewConfig(path string) (*Config, error) {

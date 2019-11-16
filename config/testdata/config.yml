@@ -1,26 +1,17 @@
-# The FQDN hosting fudge. If the `git-url` config option is set, this option
-# will be used as an import path prefix for `go-import` meta tags.
 domain: fudge.example.org
-
-# The URL of a public facing Git server hosting your repositories. If this
-# option is set, it will be used as a prefix for clone URLs and as a repository
-# root for `go-import` meta tags.
-#
-# Examples:
-#   git-url: https://github.com/username
-#   git-url: https://git.example.org
 git-url: https://git.example.org
 
-# The path to search for Git repositories in. Fudge will *not* recurse into its
-# subdirectories.
 repo-root: /home/git/
 
-# If set to `true`, the application will run in debug mode.
 debug: true
 
-# The description of each Git repository.
 descriptions:
   simple: A simple description
   multi-line: |
     A multiline description.
     This is the second line.
+
+loggers:
+  router:
+    enable: true
+    mode: stdout

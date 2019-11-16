@@ -8,14 +8,16 @@ import (
 
 	"bovarys.me/fudge/config"
 	"bovarys.me/fudge/git"
+	"bovarys.me/fudge/logger"
 	"bovarys.me/fudge/util"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	gogit "gopkg.in/src-d/go-git.v4"
 )
 
 type Handler struct {
-	Router *mux.Router
+	Router http.Handler
 
 	config *config.Config
 	tmpl   map[string]*template.Template
@@ -23,23 +25,29 @@ type Handler struct {
 
 func NewHandler(cfg *config.Config) (*Handler, error) {
 	h := &Handler{
-		Router: mux.NewRouter(),
-
 		config: cfg,
 		tmpl:   make(map[string]*template.Template),
 	}
 
-	h.Router.StrictSlash(true)
+	router := mux.NewRouter()
+	router.StrictSlash(true)
 
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-	h.Router.PathPrefix("/static/").Handler(static)
+	router.PathPrefix("/static/").Handler(static)
 
-	h.Router.HandleFunc("/", h.showHome)
-	h.Router.HandleFunc("/{repository}/", h.showTree)
-	h.Router.HandleFunc("/{repository}/commits", h.showCommits)
-	h.Router.HandleFunc("/{repository}/tree/{path:.*}", h.showTree)
-	h.Router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
-	h.Router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
+	router.HandleFunc("/", h.showHome)
+	router.HandleFunc("/{repository}/", h.showTree)
+	router.HandleFunc("/{repository}/commits", h.showCommits)
+	router.HandleFunc("/{repository}/tree/{path:.*}", h.showTree)
+	router.HandleFunc("/{repository}/blob/{path:.*}", h.showBlob)
+	router.HandleFunc("/{repository}/raw/{path:.*}", h.sendBlob)
+
+	h.Router = router
+
+	err := h.setLoggers()
+	if err != nil {
+		return nil, err
+	}
 
 	pages := []string{"home", "commits", "tree", "blob", "404", "500"}
 	for _, page := range pages {
@@ -55,6 +63,26 @@ func NewHandler(cfg *config.Config) (*Handler, error) {
 	}
 
 	return h, nil
+}
+
+func (h *Handler) setLoggers() error {
+	loggerConfig, ok := h.config.Loggers["router"]
+	if !ok {
+		return nil
+	}
+
+	if !loggerConfig.Enable {
+		return nil
+	}
+
+	writer, err := logger.Writer(loggerConfig)
+	if err != nil {
+		return err
+	}
+
+	h.Router = handlers.CombinedLoggingHandler(writer, h.Router)
+
+	return nil
 }
 
 func (h *Handler) openRepository(w http.ResponseWriter, r *http.Request) (*gogit.Repository, error) {

@@ -54,4 +54,19 @@ func TestConfig(t *testing.T) {
 			t.Errorf("wrong description for %v: got %v want %v", name, got, want)
 		}
 	}
+
+	loggerConfig, ok := cfg.Loggers["router"]
+	if !ok {
+		t.Error("expected a router logger entry")
+	}
+
+	if !loggerConfig.Enable {
+		t.Error("expected the router logger to be enabled")
+	}
+
+	want = "stdout"
+	if loggerConfig.Mode != want {
+		t.Errorf("wrong router logger mode: got %q want %q",
+			loggerConfig.Mode, want)
+	}
 }

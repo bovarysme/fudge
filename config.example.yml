@@ -24,3 +24,20 @@ descriptions:
   multi-line: |
     A multiline description.
     This is the second line.
+
+loggers:
+  router:
+    # If set to `true`, requests made to the router will be logged in Apache's
+    # Combined Log Format.
+    enable: false
+    # The logger's mode. Available modes are: stdout, stderr, file, and syslog.
+    mode:
+    # If `mode` is set to "file", this option will be used as the log file
+    # path. If the file exists, it will be opened in append mode. Otherwise, it
+    # will be created with 0644 permissions. Fudge will not rotate log files,
+    # please use an external program like logrotate or newsyslog to do so.
+    path:
+    # If `mode` is set to "syslog", this option will be used as the syslog
+    # priority. Available priorities are: emerg, alert, crit, err, warning,
+    # notice, info, and debug.
+    priority:

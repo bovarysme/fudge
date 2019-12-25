@@ -1,4 +1,24 @@
 # Changelog
+## v0.4.0 - 2019-12-25
+### Added
+
+- Add more tests to `config_test.go`
+- Test the `git.go` file
+- Add Makefile targets to run tests
+- Optionally log requests made to the router
+
+### Changed
+
+- Add a margin at the page bottom
+- Rename `TreeBlob` to `Blob`
+
+## Fixed
+
+- Fix bugs when regular files were at the `repo-root`
+- Ignore `generate.go` when building or testing
+- Add a DOCTYPE
+- Add a HTML lang attribute
+
 ## v0.3.0 - 2019-10-17
 ### Added
 
